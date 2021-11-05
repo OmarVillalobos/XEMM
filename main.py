@@ -14,12 +14,16 @@
 import pandas as pd
 import pandas as np
 from pandas._libs.tslibs import timestamps
-
+import plotly.express as px
+import plotly.graph_objects as go
 # -- Load other scripts
 from data import fees_schedule, order_book
+import data as d
+import importlib
+importlib.reload(d)
 
 # Small test
-exchanges = ["bitfinex", "kraken"]
+exchanges =  [ "bitfinex","kraken","ftx", "currencycom", 'coinmate']
 symbol = 'BTC/EUR'
 expected_volume = 0
 
@@ -27,13 +31,54 @@ expected_volume = 0
 # fees = fees_schedule(exchange='kraken', symbol=symbol, expected_volume=expected_volume)
 
 # Massive download of OrderBook data
-data = order_book(symbol=symbol, exchanges=exchanges, output='inplace', stop=None, verbose=True)
-
+data = d.order_book(symbol=symbol, exchanges=exchanges, output='inplace', stop=None, verbose=True)
+dict_lst = []
 for exchange in exchanges:
     for i in range(len(list(data[exchange].keys()))):
-        tmp =list(data[exchange].keys())[i]
-        print('Timestamp',exchange , ': ', tmp)
+        timeStamp = list(data[exchange].keys())[i]
+        dict_lst.append(
+            {
+                'exchange': exchange,
+                'timeStamp' : timeStamp,
+                'levels': len(data[exchange][timeStamp]),
+                'ask_volume' : sum(data[exchange][timeStamp].ask_size),
+                'bid_volume' : sum(data[exchange][timeStamp].bid_size),
+                'total_volume' : sum(data[exchange][timeStamp].ask_size) + 
+                                 sum(data[exchange][timeStamp].bid_size),
+                'mid_price' : (data[exchange][timeStamp].iloc[0].ask + 
+                               data[exchange][timeStamp].iloc[0].bid) / 2,
+                'vwap' :  (sum(data[exchange][timeStamp].ask * 
+                              data[exchange][timeStamp].ask_size) / 
+                              sum(data[exchange][timeStamp].ask_size) + 
+                          sum(data[exchange][timeStamp].bid * 
+                              data[exchange][timeStamp].bid_size) / 
+                              sum(data[exchange][timeStamp].bid_size)) / 2 
+            }
+        )
+tmp = pd.DataFrame(dict_lst)
+fig = px.line(tmp, x="timeStamp", y=['mid_price','vwap'],
+                 color='exchange', line_dash ='exchange' , 
+                 title='custom tick labels')
+fig.show()
 
+plot = go.Figure()
+plot.add_trace(go.Scatter(
+    x = tmp['timeStamp'],
+    y = tmp['vwap'],
+    color = tmp['exchange']
+))
+plot.show()
+# fig = go.Figure()
+# fig.add_trace(go.Scatter(x=random_x, y=random_y0,
+#                     mode='lines',
+#                     name='lines'))
+# fig.add_trace(go.Scatter(x=random_x, y=random_y1,
+#                     mode='lines+markers',
+#                     name='lines+markers'))
+# fig.add_trace(go.Scatter(x=random_x, y=random_y2,
+#                     mode='markers', name='markers'))
+
+# fig.show()
 
 # Test
 # data['kraken'][list(data['kraken'].keys())[2]]
