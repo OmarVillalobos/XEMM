@@ -13,7 +13,6 @@
 # -- Load Packages for this script
 import pandas as pd
 import pandas as np
-from pandas._libs.tslibs import timestamps
 
 # -- Load other scripts
 from data import fees_schedule, order_book
@@ -27,24 +26,13 @@ expected_volume = 0
 # fees = fees_schedule(exchange='kraken', symbol=symbol, expected_volume=expected_volume)
 
 # Massive download of OrderBook data
-data = order_book(symbol=symbol, exchanges=exchanges, output='inplace', stop=None, verbose=True)
-
-for exchange in exchanges:
-    for i in range(len(list(data[exchange].keys()))):
-        tmp =list(data[exchange].keys())[i]
-        print('Timestamp',exchange , ': ', tmp)
-
+# data = order_book(symbol=symbol, exchanges=exchanges, output='inplace', stop=None, verbose=True)
 
 # Test
 # data['kraken'][list(data['kraken'].keys())[2]]
 
 # Read previously downloaded file
 ob_data = pd.read_json('files/orderbooks_06jun2021.json', orient='values', typ='series')
-
-# OrderBooks
-pd.DataFrame(ob_data['bitfinex']['2021-07-06T18:02:31.524Z'])
-
-
 
 # -- Simulation of trades (Pending)
 

@@ -91,7 +91,7 @@ def fees_schedule(exchange, symbol, expected_volume):
 
 def order_book(symbol, exchanges, execution='async', stop=None, output=None, verbose=True):
     """
-    Asyncronous I/O OrderBook data fetcher. It will asyncronously catch innovations of transactions whenever they
+    Asyncronous OrderBook data fetcher. It will asyncronously catch innovations of transactions whenever they
     occur for every exchange is included in the list exchanges, and return the complete orederbook in a in a
     JSON format or DataFrame format with 'ask', 'ask_size', 'bid', 'bid_size'.
 
@@ -155,7 +155,7 @@ def order_book(symbol, exchanges, execution='async', stop=None, output=None, ver
     """
     
     # Store data for every exchange in the list
-    r_data = {'bitfinex': {}, 'kraken': {}, "ftx" :{}, "currencycom" : {}, "coinmate": {}}
+    r_data = {'bitfinex': {}, 'kraken': {}}
 
     # ----------------------------------------------------------------------------- ASYNCRONOUS REQUESTS -- # 
     async def async_client(exchange, symbol):
@@ -177,7 +177,7 @@ def order_book(symbol, exchanges, execution='async', stop=None, output=None, ver
         time_f = 0
 
         # Loop until stop criteria is reached
-        while time_f <= 10:
+        while time_f <= 60:
             
             # Try and await for client response
             try:
@@ -205,9 +205,6 @@ def order_book(symbol, exchanges, execution='async', stop=None, output=None, ver
 
             # In case something bad happens with client
             except Exception as e:
-                # End time
-                time_2 = time.time()
-                time_f = round(time_2 - time_1, 4)
                 print(type(e).__name__, e.args, str(e))
                 pass
 
